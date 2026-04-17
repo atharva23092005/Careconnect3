@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}CareConnect{% endblock %} – Elderly Health Monitoring</title>
+    <meta name="description" content="CareConnect – AI-powered elderly routine monitoring and health risk prediction." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="nav-brand">
+            <i class="fa-solid fa-heart-pulse"></i> CareConnect
+        </a>
+        <div class="nav-actions">
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+                <a href="{{ url_for('health_input') }}" class="nav-link {% if request.endpoint == 'health_input' %}active{% endif %}">
+                    <i class="fa-solid fa-notes-medical"></i> Health Log
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-nav">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-ghost">Log In</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer class="site-footer">
+        <p>💚 &copy; 2024 CareConnect — Compassionate Technology for Senior Citizens</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

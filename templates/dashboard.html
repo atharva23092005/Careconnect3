@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>
+            <i class="fa-solid fa-gauge-high" style="color:var(--teal-dark);font-size:1.5rem;vertical-align:middle;margin-right:0.4rem;"></i>
+            Health Dashboard
+        </h1>
+        <p>Welcome back, <strong>{{ username }}</strong> 👋 — Here's your care overview.</p>
+    </div>
+    <a href="{{ url_for('health_input') }}" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Log Today's Routine
+    </a>
+</div>
+
+<!-- Summary Cards -->
+<div class="stats-row">
+    <div class="stat-card {% if latest %}stat-score{% else %}stat-empty{% endif %}">
+        <div class="stat-icon bg-teal"><i class="fa-solid fa-chart-line"></i></div>
+        <div>
+            <p class="stat-label">Compliance Score</p>
+            <p class="stat-val">{% if latest %}{{ latest.compliance_score }}%{% else %}—{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="stat-card {% if latest %}stat-{{ latest.rule_risk | lower }}{% else %}stat-empty{% endif %}">
+        <div class="stat-icon {% if latest %}{% if latest.rule_risk == 'Low' %}bg-green{% elif latest.rule_risk == 'Moderate' %}bg-amber{% else %}bg-rose{% endif %}{% else %}bg-gray{% endif %}">
+            <i class="fa-solid fa-shield-heart"></i>
+        </div>
+        <div>
+            <p class="stat-label">Rule-Based Risk</p>
+            <p class="stat-val">{% if latest %}{{ latest.rule_risk }}{% else %}—{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="stat-card {% if latest %}stat-{{ latest.ml_prediction | lower }}{% else %}stat-empty{% endif %}">
+        <div class="stat-icon {% if latest %}{% if latest.ml_prediction == 'Low' %}bg-green{% elif latest.ml_prediction == 'Moderate' %}bg-amber{% else %}bg-rose{% endif %}{% else %}bg-gray{% endif %}">
+            <i class="fa-solid fa-brain"></i>
+        </div>
+        <div>
+            <p class="stat-label">ML Prediction</p>
+            <p class="stat-val">{% if latest %}{{ latest.ml_prediction }}{% else %}—{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-info">
+        <div class="stat-icon bg-teal"><i class="fa-solid fa-calendar-check"></i></div>
+        <div>
+            <p class="stat-label">Total Records</p>
+            <p class="stat-val">{{ records | length }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Latest Entry Detail -->
+{% if latest %}
+<div class="card mt-2">
+    <div class="card-header">
+        <h2><i class="fa-solid fa-clipboard-list"></i> Latest Entry</h2>
+        <p>Recorded on {{ latest.recorded_at[:10] }}</p>
+    </div>
+    <div class="card-body">
+        <div class="detail-row">
+            <div class="detail-item">
+                <i class="fa-solid fa-person-cane"></i>
+                <div><span>Age</span><strong>{{ latest.age }} yrs</strong></div>
+            </div>
+            <div class="detail-item {{ 'yes' if latest.medication_taken else 'no' }}">
+                <i class="fa-solid fa-pills"></i>
+                <div><span>Medication</span><strong>{% if latest.medication_taken %}Taken ✓{% else %}Missed ✗{% endif %}</strong></div>
+            </div>
+            <div class="detail-item {{ 'yes' if latest.meals_taken else 'no' }}">
+                <i class="fa-solid fa-bowl-food"></i>
+                <div><span>Meals</span><strong>{% if latest.meals_taken %}Eaten ✓{% else %}Skipped ✗{% endif %}</strong></div>
+            </div>
+            <div class="detail-item {{ 'yes' if latest.cleaning_done else 'no' }}">
+                <i class="fa-solid fa-soap"></i>
+                <div><span>Hygiene</span><strong>{% if latest.cleaning_done %}Done ✓{% else %}Not Done ✗{% endif %}</strong></div>
+            </div>
+        </div>
+
+        <div class="progress-wrap mt-1">
+            <div class="progress-labels">
+                <span>Compliance Score</span>
+                <strong>{{ latest.compliance_score }}%</strong>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill {{ 'fill-green' if latest.compliance_score >= 80 else 'fill-amber' if latest.compliance_score >= 60 else 'fill-rose' }}"
+                     style="width: {{ latest.compliance_score }}%"></div>
+            </div>
+            <p class="formula-note">
+                <i class="fa-solid fa-circle-info"></i>
+                Score = (Medication × 0.5 + Meals × 0.3 + Cleaning × 0.2) × 100
+            </p>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="empty-state card mt-2">
+    <i class="fa-regular fa-face-smile-beam"></i>
+    <h3>No health records yet</h3>
+    <p>Start logging your daily routine to get personalised health insights and risk predictions.</p>
+    <a href="{{ url_for('health_input') }}" class="btn btn-primary mt-1">
+        <i class="fa-solid fa-plus"></i> Log Your First Entry
+    </a>
+</div>
+{% endif %}
+
+<!-- History Table -->
+{% if records %}
+<div class="card mt-2" style="margin-bottom:2rem;">
+    <div class="card-header">
+        <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Records</h2>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Age</th>
+                        <th>Medication</th>
+                        <th>Meals</th>
+                        <th>Hygiene</th>
+                        <th>Score</th>
+                        <th>Rule Risk</th>
+                        <th>ML Prediction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td>{{ r.recorded_at[:10] }}</td>
+                        <td>{{ r.age }}</td>
+                        <td><span class="badge {{ 'badge-yes' if r.medication_taken else 'badge-no' }}">{% if r.medication_taken %}Yes{% else %}No{% endif %}</span></td>
+                        <td><span class="badge {{ 'badge-yes' if r.meals_taken else 'badge-no' }}">{% if r.meals_taken %}Yes{% else %}No{% endif %}</span></td>
+                        <td><span class="badge {{ 'badge-yes' if r.cleaning_done else 'badge-no' }}">{% if r.cleaning_done %}Yes{% else %}No{% endif %}</span></td>
+                        <td><strong>{{ r.compliance_score }}%</strong></td>
+                        <td><span class="risk-badge risk-{{ r.rule_risk | lower }}">{{ r.rule_risk }}</span></td>
+                        <td><span class="risk-badge risk-{{ r.ml_prediction | lower }}">{{ r.ml_prediction }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

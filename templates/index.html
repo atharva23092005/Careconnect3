@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-body">
+        <div class="hero-eyebrow"><i class="fa-solid fa-heart-pulse"></i> Elderly Health Monitoring</div>
+        <h1 class="hero-title">
+            Caring for Your Loved Ones,<br>
+            <span class="hero-accent">Every Single Day</span>
+        </h1>
+        <p class="hero-sub">
+            CareConnect gently monitors daily routines of elderly individuals — medication, diet, and hygiene —
+            using AI-powered health risk assessment to keep them safe, healthy, and cared for.
+        </p>
+        <div class="hero-cta">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-heart"></i> Get Started Free
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-ghost btn-lg">Sign In</a>
+        </div>
+    </div>
+</section>
+
+<section class="how-section">
+    <p class="section-label">How It Works</p>
+    <h2>Simple, Compassionate Care Monitoring</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-pills"></i></div>
+            <h3>Medication Tracking</h3>
+            <p>Log and monitor daily medication adherence so nothing is ever missed.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-bowl-food"></i></div>
+            <h3>Nutrition Monitoring</h3>
+            <p>Track meal habits daily to ensure proper nutrition and wellbeing.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-brain"></i></div>
+            <h3>AI Risk Prediction</h3>
+            <p>A Decision Tree model trained on real patient data predicts health risk.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>Compliance Score</h3>
+            <p>A weighted daily score gives instant, clear insight into health adherence.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

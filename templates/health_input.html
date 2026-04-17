@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Daily Routine Check-In{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fa-solid fa-notes-medical" style="color:var(--teal-dark);font-size:1.5rem;vertical-align:middle;margin-right:0.4rem;"></i>Daily Routine Check-In</h1>
+        <p>Log today's activities to get your personalised health assessment</p>
+    </div>
+</div>
+
+<div class="two-col">
+    <!-- Input Form -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-pen-to-square"></i> Today's Routine</h2>
+            <p>Select the options that best describe your day</p>
+        </div>
+        <div class="card-body">
+            <form id="healthForm">
+                <div class="form-group">
+                    <label for="age"><i class="fa-solid fa-person-cane"></i> Age</label>
+                    <input type="number" id="age" name="age" class="form-control" min="50" max="110" value="65" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="medication"><i class="fa-solid fa-pills"></i> Medication</label>
+                    <select id="medication" name="medication" class="form-control" required>
+                        <option value="">— Select —</option>
+                        <option value="1">✅ Taken on time</option>
+                        <option value="0">❌ Not taken</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="meals"><i class="fa-solid fa-bowl-food"></i> Meals</label>
+                    <select id="meals" name="meals" class="form-control" required>
+                        <option value="">— Select —</option>
+                        <option value="1">✅ Meals eaten</option>
+                        <option value="0">❌ Skipped meals</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cleaning"><i class="fa-solid fa-soap"></i> Hygiene / Cleaning</label>
+                    <select id="cleaning" name="cleaning" class="form-control" required>
+                        <option value="">— Select —</option>
+                        <option value="1">✅ Done</option>
+                        <option value="0">❌ Not done</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-primary btn-full mt-1">
+                    <span id="btnText"><i class="fa-solid fa-wand-magic-sparkles"></i> Save &amp; Get Assessment</span>
+                    <span id="btnLoader" class="hidden"><i class="fa-solid fa-spinner fa-spin"></i> Analysing…</span>
+                </button>
+                <div id="formError" class="alert alert-danger hidden mt-1"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Result Panel -->
+    <div id="resultSection">
+        <!-- Score Result -->
+        <div class="card result-card" id="scoreCard" style="display:none; margin-bottom:1.25rem;">
+            <div class="card-header"><h2><i class="fa-solid fa-chart-pie"></i> Your Compliance Score</h2></div>
+            <div class="card-body centered">
+                <div class="ring-wrap">
+                    <svg class="ring-svg" viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="50"/>
+                        <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="50"
+                                stroke-dasharray="314" stroke-dashoffset="314"/>
+                    </svg>
+                    <div class="ring-label">
+                        <span class="ring-value" id="scoreValue">0</span>
+                        <span class="ring-sub">Score</span>
+                    </div>
+                </div>
+                <div class="risk-row">
+                    <div>
+                        <p class="risk-label"><i class="fa-solid fa-ruler"></i> Rule-Based</p>
+                        <span class="risk-badge" id="ruleRisk">—</span>
+                    </div>
+                    <div>
+                        <p class="risk-label"><i class="fa-solid fa-brain"></i> ML Prediction</p>
+                        <span class="risk-badge" id="mlRisk">—</span>
+                    </div>
+                </div>
+                <p id="recommendation" class="formula-note" style="margin-top:1.25rem;font-size:0.9rem;"></p>
+            </div>
+        </div>
+
+        <!-- How It Works (shown initially) -->
+        <div class="card" id="infoCard">
+            <div class="card-body centered">
+                <i class="fa-solid fa-circle-info info-icon"></i>
+                <h3 style="font-weight:800;margin-bottom:0.25rem;">How It Works</h3>
+                <p style="font-size:0.875rem;color:var(--warm-400);margin-bottom:1rem;">Fill the form to see your result</p>
+                <div class="steps">
+                    <div class="step">
+                        <span class="step-n">1</span>
+                        <p>Fill in your daily health activities on the left.</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-n">2</span>
+                        <p>System calculates your compliance score using a weighted formula.</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-n">3</span>
+                        <p>A Decision Tree model trained on real patient data predicts your risk level.</p>
+                    </div>
+                </div>
+                <div class="formula-box">
+                    <strong>Compliance Score Formula</strong>
+                    <code>Score = (Medication×0.5 + Meals×0.3 + Cleaning×0.2) × 100</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const recommendations = {
+    Low:      "🌟 Excellent! Your compliance is great. Keep up the wonderful routine!",
+    Moderate: "💛 Good effort! Try to be more consistent with medication and meals for better health.",
+    High:     "❗ High risk detected. Please improve your daily routine and consider consulting a doctor."
+};
+
+document.getElementById('healthForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btnText  = document.getElementById('btnText');
+    const btnLoad  = document.getElementById('btnLoader');
+    const submitBtn = document.getElementById('submitBtn');
+    const formErr  = document.getElementById('formError');
+
+    const med  = document.getElementById('medication').value;
+    const meal = document.getElementById('meals').value;
+    const cln  = document.getElementById('cleaning').value;
+
+    if (!med || !meal || !cln) {
+        formErr.textContent = '⚠ Please select an option for all fields before submitting.';
+        formErr.classList.remove('hidden');
+        return;
+    }
+    formErr.classList.add('hidden');
+
+    btnText.classList.add('hidden');
+    btnLoad.classList.remove('hidden');
+    submitBtn.disabled = true;
+
+    const payload = {
+        age:        parseInt(document.getElementById('age').value),
+        medication: parseInt(med),
+        meals:      parseInt(meal),
+        cleaning:   parseInt(cln)
+    };
+
+    try {
+        const res  = await fetch('/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Server error. Please try again.');
+
+        document.getElementById('infoCard').style.display  = 'none';
+        const scoreCard = document.getElementById('scoreCard');
+        scoreCard.style.display = 'block';
+        scoreCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        const score = data.compliance_score;
+        document.getElementById('scoreValue').textContent = score;
+
+        const offset = 314 - (score / 100) * 314;
+        const ring   = document.getElementById('ringFill');
+        ring.style.strokeDashoffset = offset;
+        ring.style.stroke = score >= 80 ? '#16a34a' : score >= 60 ? '#d97706' : '#dc2626';
+
+        setRiskBadge('ruleRisk', data.rule_based_risk);
+        setRiskBadge('mlRisk',   data.ml_prediction);
+
+        const finalRisk = data.rule_based_risk;
+        document.getElementById('recommendation').textContent = recommendations[finalRisk] || '';
+
+    } catch (err) {
+        formErr.textContent = err.message;
+        formErr.classList.remove('hidden');
+    } finally {
+        btnText.classList.remove('hidden');
+        btnLoad.classList.add('hidden');
+        submitBtn.disabled = false;
+    }
+});
+
+function setRiskBadge(id, risk) {
+    const el = document.getElementById(id);
+    el.textContent = risk;
+    el.className = 'risk-badge risk-' + risk.toLowerCase();
+}
+</script>
+{% endblock %}
