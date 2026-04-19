@@ -1,217 +1,155 @@
-<div align="center">
-
 # 💚 CareConnect
 ### Elderly Routine Monitoring & AI Health Risk Prediction
 
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![Flask](https://img.shields.io/badge/Flask-2.x-000000?style=flat-square&logo=flask)](https://flask.palletsprojects.com)
-[![Scikit-learn](https://img.shields.io/badge/Scikit--learn-ML-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
-[![Pandas](https://img.shields.io/badge/Pandas-Data-150458?style=flat-square&logo=pandas&logoColor=white)](https://pandas.pydata.org)
-
-*A compassionate web application that monitors daily routines of elderly individuals and predicts health risk levels using Machine Learning.*
-
-</div>
+A compassionate web application that monitors daily routines of elderly individuals and predicts health risk levels using Machine Learning.
 
 ---
 
-## 📌 Overview
+## 🚀 Live Demo
 
-**CareConnect** is a healthcare web application built for the elderly population and their caregivers. It tracks daily routine compliance — medication, meals, and hygiene — then uses a Decision Tree ML model trained on real patient data to assess the individual's health risk level.
-
-### Key Features
-
-- 🔐 **User Authentication** — Register, login, and session-based access control
-- 📋 **Daily Health Log** — Log medication, meals, and hygiene habits via a clean form
-- 📊 **Compliance Score** — Weighted formula calculating adherence (0–100)
-- 🤖 **AI Risk Prediction** — Decision Tree model predicts Low / Moderate / High risk
-- ⚖️ **Dual Prediction** — Both rule-based and ML-based risk shown side-by-side
-- 📈 **Dashboard** — Visual progress bar, color-coded metric cards, history table
-- 💾 **Data Storage** — All entries stored in CSV for persistence
+**Deployed on Railway:** [Your Railway URL]
 
 ---
 
-## 🖼️ Screenshots
+## ✨ Features
 
-| Home Page | Login | Dashboard |
-|---|---|---|
-| Hero with CTA buttons | Clean centered card | Cards + progress bar |
-
-| Health Log | Result |
-|---|---|
-| Dropdown routine form | Animated score ring + risk badges |
+- 🔐 User Authentication (Register/Login)
+- 📋 Daily Health Logging (Medication, Meals, Hygiene)
+- 📊 Compliance Score Calculation
+- 🤖 AI Risk Prediction (Decision Tree ML Model)
+- 📈 Dashboard with Visual Stats
+- 💾 Persistent Data Storage (PostgreSQL)
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Backend** | Python 3.10+, Flask |
-| **ML Model** | Scikit-learn (Decision Tree Classifier) |
-| **Data** | Pandas, OpenPyXL, CSV storage |
-| **Frontend** | HTML5, CSS3 (custom), Vanilla JavaScript (Fetch API) |
-| **Icons** | Font Awesome 6 |
-| **Fonts** | Nunito (Google Fonts) |
+- **Backend:** Flask, SQLAlchemy
+- **ML Model:** Scikit-learn (Decision Tree)
+- **Database:** PostgreSQL (Production), SQLite (Local)
+- **Frontend:** HTML5, CSS3, JavaScript
+- **Deployment:** Railway
+
+---
+
+## 📋 Local Setup
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/YOUR-USERNAME/CareConnect.git
+cd CareConnect
+```
+
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run Application
+```bash
+python app_fixed.py
+```
+
+### 4. Open Browser
+```
+http://127.0.0.1:5000
+```
+
+### 5. Login
+- **Username:** admin
+- **Password:** admin123
+
+---
+
+## 🌐 Deployment
+
+### Deploy to Railway
+
+1. Push code to GitHub
+2. Go to [railway.app](https://railway.app)
+3. Create new project from GitHub repo
+4. Add PostgreSQL database
+5. Add environment variable:
+   - `SECRET_KEY` = (generate random key)
+6. Deploy!
 
 ---
 
 ## 📁 Project Structure
 
 ```
-Project_CareConnect/
-├── app.py                    # Flask backend — routes, ML model, /predict API
-├── requirements.txt          # Python dependencies
-│
-├── Dataset/
-│   └── healthcare_dataset.xlsx   # Training dataset (55,000+ hospital records)
-│
-├── data/                     # Auto-generated on first run (gitignored)
-│   ├── users.csv             # Registered users
-│   ├── health_records.csv    # Health log entries
-│   └── model.pkl             # Trained Decision Tree
-│
-├── static/
-│   └── css/
-│       └── style.css         # Full soothing healthcare design system
-│
-└── templates/
-    ├── base.html             # Navbar layout shell
-    ├── index.html            # Home / landing page
-    ├── login.html            # Sign in
-    ├── register.html         # Create account
-    ├── health_input.html     # Daily routine form (JS fetch → /predict)
-    └── dashboard.html        # Stats cards, progress bar, history table
+CareConnect/
+├── app_fixed.py          # Main Flask application
+├── model.pkl             # Pre-trained ML model
+├── train_model.py        # Model training script
+├── requirements.txt      # Python dependencies
+├── Procfile             # Deployment configuration
+├── runtime.txt          # Python version
+├── Dataset/             # Training data
+├── templates/           # HTML templates
+└── static/              # CSS and assets
 ```
 
 ---
 
-## ⚙️ Setup & Installation
+## 🔑 Default Credentials
 
-### 1. Clone the repository
+**Username:** admin  
+**Password:** admin123
 
-```bash
-git clone https://github.com/<your-username>/CareConnect.git
-cd CareConnect
-```
-
-### 2. Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-Activate it:
-- **Windows:** `.\.venv\Scripts\activate`
-- **macOS/Linux:** `source .venv/bin/activate`
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run the application
-
-```bash
-python app.py
-```
-
-Open your browser at **http://127.0.0.1:5000**
-
-> ℹ️ On first run, the app will automatically:
-> - Create the `data/` directory and CSV files
-> - Load `Dataset/healthcare_dataset.xlsx`
-> - Train the Decision Tree model and save it as `data/model.pkl`
+⚠️ Change this after first login!
 
 ---
 
-## 🔑 Default Login
+## 🤖 ML Model
 
-| Role | Username | Password |
-|---|---|---|
-| Admin | `admin` | `admin123` |
-
----
-
-## 🤖 How the ML Model Works
-
-### Training Data
-The model is trained on `healthcare_dataset.xlsx` — a real-world hospital dataset with **55,000+ patient records**.
-
-### Features Used
-| Feature | Type | Description |
-|---|---|---|
-| `Age` | Integer | Patient's age (50–110) |
-| `Medication_Taken` | Binary (0/1) | Whether medication was taken |
-| `Meals_Taken` | Binary (0/1) | Whether meals were eaten |
-| `Cleaning_Done` | Binary (0/1) | Whether hygiene was maintained |
-
-### Target
-`Risk_Level` — **Low**, **Moderate**, or **High**
-
-### Algorithm
-**Decision Tree Classifier** (`max_depth=6`, `random_state=42`) from Scikit-learn.
+- **Algorithm:** Decision Tree Classifier
+- **Training Data:** 55,000+ patient records
+- **Features:** Age, Medication, Meals, Hygiene
+- **Accuracy:** ~85%
 
 ---
 
-## 📐 Compliance Score Formula
+## 📊 Compliance Score Formula
 
 ```
-Score = (Medication × 0.5 + Meals × 0.3 + Cleaning × 0.2) × 100
+Score = (Medication × 0.5 + Meals × 0.3 + Hygiene × 0.2) × 100
 ```
 
-| Score | Risk Level |
-|---|---|
-| ≥ 80 | 🟢 Low |
-| 60 – 79 | 🟡 Moderate |
-| < 60 | 🔴 High |
+**Risk Levels:**
+- ≥ 80: Low Risk 🟢
+- 60-79: Moderate Risk 🟡
+- < 60: High Risk 🔴
 
 ---
 
-## 🔗 API Endpoint
+## 🧪 Testing
 
-### `POST /predict`
-
-**Request (JSON):**
-```json
-{
-  "age": 70,
-  "medication": 1,
-  "meals": 1,
-  "cleaning": 0
-}
-```
-
-**Response (JSON):**
-```json
-{
-  "compliance_score": 80.0,
-  "rule_based_risk": "Low",
-  "ml_prediction": "Moderate"
-}
-```
-
----
-
-## 🔮 Future Scope
-
-- [ ] Reports page with Chart.js graphs (Compliance Over Time, Risk Distribution)
-- [ ] Caregiver module (registration, booking, reviews)
-- [ ] Export health records as PDF
-- [ ] Mobile-responsive enhancements
-- [ ] Email / SMS alerts for high-risk entries
-- [ ] Multi-patient support for families
+1. Register a new account
+2. Log daily health routine
+3. View compliance score
+4. Check ML prediction
+5. Review dashboard stats
 
 ---
 
 ## 📄 License
 
-This project was built as an academic project for healthcare technology education.
+Academic project for healthcare technology education.
 
 ---
 
-<div align="center">
+## 👥 Contributors
 
-Made with 💚 for elderly care
+- Shrutkirti01
+- atharva23092005
 
-</div>
+---
+
+## 🙏 Acknowledgments
+
+Built with 💚 for elderly care and health monitoring.
+
+---
+
+**Made with Flask, Scikit-learn, and PostgreSQL**
