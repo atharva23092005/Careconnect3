@@ -63,7 +63,7 @@ class HealthRecord(db.Model):
 
 # ─── Load ML Model ────────────────────────────────────────────────────────────
 
-MODEL_PATH = os.path.join(basedir, 'model.pkl')
+MODEL_PATH = os.path.join(basedir, 'data', 'model.pkl')
 
 def load_ml_model():
     try:
