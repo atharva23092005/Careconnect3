@@ -161,7 +161,9 @@ document.getElementById('healthForm').addEventListener('submit', async (e) => {
     try {
         const res  = await fetch('/predict', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(payload)
         });
         const data = await res.json();

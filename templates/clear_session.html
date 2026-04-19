@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Session - CareConnect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        p { color: #666; line-height: 1.6; margin-bottom: 20px; }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+            font-weight: bold;
+        }
+        .btn:hover { background: #5568d3; }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
+        .steps {
+            text-align: left;
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .steps li { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Session Cleared!</h1>
+        <p>Your session has been cleared. You can now login fresh.</p>
+        
+        <div class="steps">
+            <strong>If you still see the dashboard:</strong>
+            <ol>
+                <li>Clear your browser cookies (Ctrl+Shift+Delete)</li>
+                <li>Or use Incognito/Private browsing mode</li>
+                <li>Then click the button below</li>
+            </ol>
+        </div>
+        
+        <a href="{{ url_for('login') }}" class="btn">Go to Login</a>
+        <a href="{{ url_for('index') }}" class="btn">Go to Home</a>
+        
+        <p style="margin-top: 30px; font-size: 14px; color: #999;">
+            Default credentials: admin / admin123
+        </p>
+    </div>
+    
+    <script>
+        // Clear any local storage
+        localStorage.clear();
+        sessionStorage.clear();
+    </script>
+</body>
+</html>

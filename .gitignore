@@ -16,12 +16,14 @@ env/
 ENV/
 
 # ─── Flask / App Specific ─────────────────────────────────────────────────────
-# Exclude generated data & ML model (regenerated on startup)
-data/model.pkl
-data/health_records.csv
-# Keep users.csv excluded too (contains passwords)
-data/users.csv
+# OLD CSV-based data (no longer used in production)
 data/
+
+# SQLite database (for local development only)
+*.db
+*.sqlite
+*.sqlite3
+careconnect.db
 
 # Dataset — exclude large CSV duplicate (xlsx is source of truth)
 Dataset/healthcare_dataset.csv
@@ -45,3 +47,7 @@ Thumbs.db
 
 # ─── Logs ─────────────────────────────────────────────────────────────────────
 *.log
+
+# ─── Keep These (Important for Production) ────────────────────────────────────
+# !model.pkl - ML model should be committed
+# !migrations/ - Database migrations should be committed

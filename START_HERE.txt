@@ -1,0 +1,71 @@
+========================================
+   CARECONNECT - HOW TO FIX LOGIN
+========================================
+
+PROBLEM: You're being redirected to dashboard automatically
+
+SOLUTION: Follow these 3 steps:
+
+STEP 1: Run this command
+------------------------
+python app_fixed.py
+
+
+STEP 2: Open Incognito/Private Window
+--------------------------------------
+Chrome: Press Ctrl + Shift + N
+Firefox: Press Ctrl + Shift + P
+Edge: Press Ctrl + Shift + N
+
+
+STEP 3: Go to this URL
+----------------------
+http://127.0.0.1:5000
+
+
+STEP 4: Login
+-------------
+Username: admin
+Password: admin123
+
+
+========================================
+
+WHY INCOGNITO MODE?
+-------------------
+Your browser has old session cookies that are 
+causing the redirect. Incognito mode bypasses this.
+
+ALTERNATIVE: Clear browser cookies
+- Press Ctrl + Shift + Delete
+- Clear cookies for "Last hour"
+- Then go to http://127.0.0.1:5000
+
+
+========================================
+
+STILL NOT WORKING?
+------------------
+1. Make sure you see this in terminal:
+   "✓ Database initialized"
+   "Running on http://127.0.0.1:5000"
+
+2. If you see "Rate limit" errors, you're 
+   running the wrong file!
+
+3. Only run: python app_fixed.py
+   (Not app.py or app_production.py)
+
+
+========================================
+
+QUICK FIX:
+----------
+1. Close all browser windows
+2. Run: python app_fixed.py
+3. Open NEW Incognito window
+4. Go to: http://127.0.0.1:5000
+5. Login: admin / admin123
+
+
+========================================

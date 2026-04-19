@@ -6,9 +6,11 @@ import numpy as np
 from datetime import datetime
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
+from werkzeug.security import generate_password_hash, check_password_hash
+from config import Config
 
 app = Flask(__name__)
-app.secret_key = 'careconnect_secret_key_2024'
+app.config.from_object(Config)
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
@@ -24,9 +26,11 @@ DATASET_XLS = os.path.join(DATASET_DIR, 'healthcare_dataset.xlsx')
 # ─── CSV Initialisation ───────────────────────────────────────────────────────
 def init_csv():
     if not os.path.exists(USERS_CSV):
+        # Hash the admin password
+        hashed_password = generate_password_hash('admin123')
         admin = pd.DataFrame([{
             'id': 1, 'username': 'admin', 'email': 'admin@careconnect.com',
-            'password': 'admin123', 'role': 'admin',
+            'password': hashed_password, 'role': 'admin',
             'created_at': datetime.now().isoformat()
         }])
         admin.to_csv(USERS_CSV, index=False)
@@ -43,32 +47,36 @@ init_csv()
 # ─── ML Model — trained on real Excel dataset ─────────────────────────────────
 def train_model_from_dataset():
     """Load healthcare_dataset.xlsx and train a Decision Tree."""
-    df = pd.read_excel(DATASET_XLS)
+    try:
+        df = pd.read_excel(DATASET_XLS)
 
-    # Rename the oddly named column produced by Excel RANDBETWEEN formula
-    med_col = [c for c in df.columns if 'Medication_Taken' in c][0]
-    df.rename(columns={med_col: 'Medication_Taken'}, inplace=True)
+        # Rename the oddly named column produced by Excel RANDBETWEEN formula
+        med_col = [c for c in df.columns if 'Medication_Taken' in c][0]
+        df.rename(columns={med_col: 'Medication_Taken'}, inplace=True)
 
-    # Keep only usable rows
-    features = ['Age', 'Medication_Taken', 'Meals_Taken', 'Cleaning_Done']
-    target   = 'Risk_Level'
-    df = df[features + [target]].dropna()
+        # Keep only usable rows
+        features = ['Age', 'Medication_Taken', 'Meals_Taken', 'Cleaning_Done']
+        target   = 'Risk_Level'
+        df = df[features + [target]].dropna()
 
-    # Encode target
-    le = LabelEncoder()
-    df[target] = le.fit_transform(df[target])   # High=0, Low=1, Moderate=2
+        # Encode target
+        le = LabelEncoder()
+        df[target] = le.fit_transform(df[target])   # High=0, Low=1, Moderate=2
 
-    X = df[features].values
-    y = df[target].values
+        X = df[features].values
+        y = df[target].values
 
-    clf = DecisionTreeClassifier(max_depth=6, random_state=42)
-    clf.fit(X, y)
+        clf = DecisionTreeClassifier(max_depth=6, random_state=42)
+        clf.fit(X, y)
 
-    with open(MODEL_PATH, 'wb') as f:
-        pickle.dump({'model': clf, 'label_encoder': le}, f)
+        with open(MODEL_PATH, 'wb') as f:
+            pickle.dump({'model': clf, 'label_encoder': le}, f)
 
-    print("[CareConnect] Model trained from dataset and saved.")
-    return clf, le
+        print("[CareConnect] Model trained from dataset and saved.")
+        return clf, le
+    except Exception as e:
+        print(f"[ERROR] Failed to train model: {e}")
+        raise
 
 def load_model():
     if os.path.exists(MODEL_PATH):
@@ -76,18 +84,26 @@ def load_model():
             with open(MODEL_PATH, 'rb') as f:
                 obj = pickle.load(f)
             return obj['model'], obj['label_encoder']
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[WARNING] Failed to load model: {e}. Retraining...")
     return train_model_from_dataset()
 
 model, label_encoder = load_model()
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def get_users():
-    return pd.read_csv(USERS_CSV)
+    try:
+        return pd.read_csv(USERS_CSV)
+    except Exception as e:
+        print(f"[ERROR] Failed to read users: {e}")
+        return pd.DataFrame()
 
 def get_health():
-    return pd.read_csv(HEALTH_CSV)
+    try:
+        return pd.read_csv(HEALTH_CSV)
+    except Exception as e:
+        print(f"[ERROR] Failed to read health records: {e}")
+        return pd.DataFrame()
 
 def next_id(df):
     return int(df['id'].max()) + 1 if len(df) > 0 and not df['id'].isna().all() else 1
@@ -123,15 +139,24 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
-        users = get_users()
-        user = users[(users['username'] == username) & (users['password'] == password)]
-        if not user.empty:
-            row = user.iloc[0]
-            session['user_id']  = int(row['id'])
-            session['username'] = row['username']
-            session['role']     = row['role']
-            return redirect(url_for('dashboard'))
-        error = 'Invalid username or password.'
+        
+        if not username or not password:
+            error = 'Username and password are required.'
+        else:
+            users = get_users()
+            user = users[users['username'] == username]
+            
+            if not user.empty:
+                row = user.iloc[0]
+                # Check hashed password
+                if check_password_hash(row['password'], password):
+                    session['user_id']  = int(row['id'])
+                    session['username'] = row['username']
+                    session['role']     = row['role']
+                    return redirect(url_for('dashboard'))
+            
+            error = 'Invalid username or password.'
+    
     return render_template('login.html', error=error)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -145,6 +170,8 @@ def register():
 
         if not username or not email or not password:
             error = 'All fields are required.'
+        elif len(password) < 6:
+            error = 'Password must be at least 6 characters.'
         elif password != confirm:
             error = 'Passwords do not match.'
         else:
@@ -154,13 +181,16 @@ def register():
             elif email in users['email'].values:
                 error = 'Email already registered.'
             else:
+                # Hash the password before storing
+                hashed_password = generate_password_hash(password)
                 new_user = pd.DataFrame([{
                     'id': next_id(users), 'username': username,
-                    'email': email, 'password': password,
+                    'email': email, 'password': hashed_password,
                     'role': 'user', 'created_at': datetime.now().isoformat()
                 }])
                 pd.concat([users, new_user], ignore_index=True).to_csv(USERS_CSV, index=False)
                 return redirect(url_for('login'))
+    
     return render_template('register.html', error=error)
 
 @app.route('/logout')
@@ -173,10 +203,12 @@ def logout():
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+    
     health = get_health()
     user_records = health[health['user_id'] == session['user_id']].sort_values('recorded_at', ascending=False)
     latest  = user_records.iloc[0].to_dict() if not user_records.empty else None
     records = user_records.head(7).to_dict('records')
+    
     return render_template('dashboard.html', latest=latest, records=records, username=session['username'])
 
 # ─── Health Input ─────────────────────────────────────────────────────────────
@@ -213,21 +245,24 @@ def predict():
     ml_risk    = ml_predict(age, medication, meals, cleaning)
 
     # Persist to CSV
-    health = get_health()
-    new_rec = pd.DataFrame([{
-        'id': next_id(health),
-        'user_id': session['user_id'],
-        'username': session['username'],
-        'age': age,
-        'medication_taken': medication,
-        'meals_taken': meals,
-        'cleaning_done': cleaning,
-        'compliance_score': score,
-        'rule_risk': rule_risk,
-        'ml_prediction': ml_risk,
-        'recorded_at': datetime.now().isoformat()
-    }])
-    pd.concat([health, new_rec], ignore_index=True).to_csv(HEALTH_CSV, index=False)
+    try:
+        health = get_health()
+        new_rec = pd.DataFrame([{
+            'id': next_id(health),
+            'user_id': session['user_id'],
+            'username': session['username'],
+            'age': age,
+            'medication_taken': medication,
+            'meals_taken': meals,
+            'cleaning_done': cleaning,
+            'compliance_score': score,
+            'rule_risk': rule_risk,
+            'ml_prediction': ml_risk,
+            'recorded_at': datetime.now().isoformat()
+        }])
+        pd.concat([health, new_rec], ignore_index=True).to_csv(HEALTH_CSV, index=False)
+    except Exception as e:
+        print(f"[ERROR] Failed to save health record: {e}")
 
     return jsonify({
         'compliance_score': score,
