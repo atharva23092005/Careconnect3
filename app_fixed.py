@@ -315,9 +315,23 @@ def init_db():
         
         print("✓ Database initialized")
 
+# Initialize database on app startup (works with Gunicorn)
+with app.app_context():
+    try:
+        db.create_all()
+        # Create admin user if not exists
+        if not User.query.filter_by(username='admin').first():
+            admin = User(username='admin', email='admin@careconnect.com', role='admin')
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+            print("✓ Admin user created")
+        print("✓ Database initialized")
+    except Exception as e:
+        print(f"⚠ Database initialization error: {e}")
+
 # ─── Run Application ──────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    init_db()
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)

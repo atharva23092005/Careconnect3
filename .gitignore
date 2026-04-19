@@ -17,7 +17,8 @@ ENV/
 
 # ─── Flask / App Specific ─────────────────────────────────────────────────────
 # OLD CSV-based data (no longer used in production)
-data/
+data/*.csv
+data/*.db
 
 # SQLite database (for local development only)
 *.db
